@@ -10,7 +10,7 @@ from pydantic import Field
 from typing import List, Optional
 from server.logger import logger
 import os
-
+from langchain_community.embeddings import HuggingFaceEmbeddings
 router=APIRouter()
 
 @router.post("/ask/")
@@ -21,7 +21,9 @@ async def ask_question(question: str = Form(...)):
         # Embed model + Pinecone setup
         pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
         index = pc.Index(os.environ["PINECONE_INDEX_NAME"])
-        embed_model = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+        embed_model = HuggingFaceEmbeddings(
+            model_name="all-MiniLM-L6-v2"
+        )
         embedded_query = embed_model.embed_query(question)
         res = index.query(vector=embedded_query, top_k=3, include_metadata=True)
 
